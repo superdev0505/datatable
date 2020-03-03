@@ -1,0 +1,83 @@
+.ld-datatable-container {
+    width: 100%;
+    height: 200px;
+    overflow-y: auto;
+}
+
+.ld-datatable {
+    width: 100%;
+}
+
+.ld-datatable thead tr th {
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    box-shadow: 0px -2px 2px darkgrey;
+    border-bottom: 1px solid darkgrey;
+    min-width: 80px;
+    text-overflow: ellipsis;
+    position: -webkit-sticky;
+    /* for Safari */
+    position: sticky;
+    top: 0;
+    z-index: 11;
+}
+
+.ld-datatable th,
+.ld-datatable td {
+    background-color: white;
+}
+
+.ld-datatable tbody {
+    border: 1px solid darkgrey;
+}
+
+.ld-datatable tbody td.ld-datatable-fixed {
+    position: -webkit-sticky;
+    /* for Safari */
+    position: sticky;
+    left: 0;
+    z-index: 10;
+}
+
+.ld-datatable thead th.ld-datatable-fixed {
+    left: 0;
+    z-index: 12;
+}
+
+.ld-datatable-move-handle {
+    float: left;
+    position: absolute;
+}
+
+.ld-datatable-move-handle:hover {
+    cursor: pointer;
+}
+
+.ld-datatable-resize-handle {
+    float: right;
+    position: absolute;
+    width: 5px;
+    height: 100%;
+    background-color: royalblue;
+    opacity: 0;
+    right: 0;
+    top: 0;
+}
+
+.ld-datatable-resize-handle:hover {
+    opacity: 1;
+    cursor: col-resize;
+}
+
+.ld-datatable-move-ghost-placeholder {
+    height: 150px;
+    border: 1px solid rgba(88, 88, 88, 0.3);
+    border-radius: 10px;
+    background-color: rgba(255, 255, 255, 0.3);
+    text-align: center;
+}
+
+.ld-datatable th.ld-datatable-move-hover {
+    background-color: darkgrey;
+    color: white;
+}
