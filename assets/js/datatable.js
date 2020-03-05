@@ -44,6 +44,12 @@ function DataTable(data) {
         this.sort = {};
     }
 
+    if (data.cell_height) {
+        this.cell_height = data.cell_height
+    } else {
+        this.cell_height = 40
+    }
+
     this.move = $('<span class="ui-icon ui-icon-arrow-4 ld-datatable-move-handle"></span>');
     this.moving_flag = false;
 
@@ -64,7 +70,7 @@ function DataTable(data) {
             that.data = data;
             that.render(data);
             var div = $('<div class="ld-datatable-scroller"></div');
-            var height = that.data.info.total_amount * 38;
+            var height = that.data.info.total_amount * this.cell_height;
             div.height(height);
             that.table_container.append(div);
             var ths = $('th', that.table);
@@ -102,7 +108,7 @@ function DataTable(data) {
             var top = $(this).scrollTop();
 
             var position = Math.floor((top / 38));
-            if( that.start_pos !=  Math.floor(position / 10) && position != 0) {
+            if( that.start_pos !=  Math.floor(position / 10)) {
                 $.post(
                     that.ajax, {
                     start_pos: (position - Math.floor(that.amount_per_page / 2)) > 0 ? (position - Math.floor(that.amount_per_page / 2)) : 0,
@@ -115,7 +121,7 @@ function DataTable(data) {
                         that.render(data);
                         that.start_pos = Math.floor(position / 10);
 
-                        if(position > that.amount_per_page / 2)
+                        if(position > Math.floor(that.amount_per_page / 2))
                             that.table.css('top',(top - Math.floor(that.amount_per_page / 2) * 38) + 'px');
                         else
                             that.table.css('top',0 + 'px');
@@ -335,5 +341,7 @@ DataTable.prototype.render = function () {
             tr.append(td);
         }
     }
-    
+    if (this.cell_height != 40) {
+        $('tr', this.table).height(this.cell_height);
+    }
 }
