@@ -108,10 +108,10 @@ function DataTable(data) {
     });
 
     that.table.on('mouseover', '.ld-datatable-move-handle', function () {
-        that.resize.css('cursor', 'pointer');
+        that.move.css('cursor', 'pointer');
     });
     that.table.on('mouseleave', '.ld-datatable-move-handle', function () {
-        that.resize.css('cursor', 'auto');
+        that.move.css('cursor', 'auto');
     });
 
     that.table_container.on('scroll', function (e) {
@@ -177,6 +177,9 @@ function DataTable(data) {
         }
     });
     $(document).on('mousemove', function (e) {
+        if (that.moving_flag === true || that.resizing_flag === true) {
+            that.table.css('user-select', 'none');
+        } 
         if (that.moving_flag === true) {
             var ghost_pos = that.ghost.offset();
             var current_offset = {
@@ -217,6 +220,7 @@ function DataTable(data) {
         }
     });
     $(document).on('mouseup', function (e) {
+        that.table.css('user-select', 'initial');
         if (that.moving_flag) {
             that.moving_flag = false;
             that.ghost.remove();
