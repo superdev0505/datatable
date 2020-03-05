@@ -44,10 +44,10 @@ function DataTable(data) {
         this.sort = {};
     }
 
-    if (data.cell_height) {
-        this.cell_height = data.cell_height
+    if (data.row_height) {
+        this.row_height = data.row_height
     } else {
-        this.cell_height = 40
+        this.row_height = 40
     }
 
     this.move = $('<span class="ui-icon ui-icon-arrow-4 ld-datatable-move-handle"></span>');
@@ -341,7 +341,7 @@ DataTable.prototype.render = function () {
             tr.append(td);
         }
     }
-    if (this.cell_height != 40) {
-        $('tr', this.table).height(this.cell_height);
+    if (this.row_height != 40) {
+        $('tr', this.table).height(this.row_height);
     }
 }

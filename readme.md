@@ -26,6 +26,16 @@ $(document).ready(function () {
 </script>
 ```
 
+#### Datatable function parameters
+
+| parameter     | type   | require  | description   |
+| ------------- | :----- | -------- | ------------- |
+| table         | string | required | Selector of table |
+| ajax          | string | required | Ajax url to get data of table |
+| row_height    | int    | optional | height of row (default: 40) |
+| pagination    | int    | optional | amount per page (default: 40) |
+
+
 #### Datatable Features
 
 * Resize Column Width
