@@ -10,6 +10,9 @@
       overflow-x: auto;
       margin: 12px auto;
     }
+    /* #example {
+      position: absolute;
+    } */
   </style>
   <style>
     
@@ -28,7 +31,8 @@
     $(document).ready(function () {
       var datatable = new DataTable({
         table: '#example',
-        ajax: 'http://localhost/datatable/getData.php'
+        ajax: 'http://localhost/datatable/getData.php',
+        pagination: 80
       });
     });
   </script>

@@ -2,7 +2,7 @@ function DataTable(data) {
     this.table_container = $('<div class="ld-datatable-container"></div>');
     this.table = $(data.table);
     this.table.addClass('ld-datatable');
-    this.table.parent().css('overflow-x', 'auto');
+    // this.table.parent().css('overflow-x', 'auto');
     if (data.ajax) {
         this.ajax = data.ajax;
     } else {
@@ -11,6 +11,7 @@ function DataTable(data) {
     var min_width = this.table.parent().width();
 
     this.table_container.css('min-width', min_width);
+    this.table_container.css('overflow-x', 'auto');
     this.table_container.appendTo(this.table.parent());
     this.table_container.append(this.table);
     this.start_pos = 0;
@@ -22,7 +23,7 @@ function DataTable(data) {
     if (data.pagination) {
         this.amount_per_page = data.pagination
     } else {
-        this.amount_per_page = 30;
+        this.amount_per_page = 40;
     }
 
     if (data.data) {
@@ -62,6 +63,15 @@ function DataTable(data) {
         function (data) {
             that.data = data;
             that.render(data);
+            var div = $('<div class="ld-datatable-scroller"></div');
+            var height = that.data.info.total_amount * 38;
+            div.height(height);
+            that.table_container.append(div);
+            var ths = $('th', that.table);
+            for (var i = 0; i < ths.length; i ++) {
+                var width = ths.eq(i).width();
+                ths.eq(i).width(width);
+            }
         }
     )
 
@@ -81,22 +91,21 @@ function DataTable(data) {
         that.resize.remove();
     });
 
-    that.table_container.parent().on('scroll', function (e) {
+    that.table_container.on('scroll', function (e) {
         var left = $(this).scrollLeft();
         if (left > 0) {
             $('.ld-datatable-fixed', that.table).css('opacity', '0.7');
         } else {
             $('.ld-datatable-fixed', that.table).css('opacity', '1');
         }
-    });
-
-    that.table_container.on('scroll', function (e) {
         if (that.ajax) {
             var top = $(this).scrollTop();
-            if (top == 0 && that.start_pos != 0) {
+
+            var position = Math.floor((top / 38));
+            if( that.start_pos !=  Math.floor(position / 10) && position != 0) {
                 $.post(
                     that.ajax, {
-                    start_pos: that.start_pos - that.amount_per_page,
+                    start_pos: (position - Math.floor(that.amount_per_page / 2)) > 0 ? (position - Math.floor(that.amount_per_page / 2)) : 0,
                     limit: that.amount_per_page,
                     filter: that.filter,
                     sort: that.sort
@@ -104,22 +113,12 @@ function DataTable(data) {
                     function (data) {
                         that.data = data;
                         that.render(data);
-                    }
-                )
-            }
-            if (top + $(this).height() >= that.table.height()) {
-                $.post(
-                    that.ajax, {
-                    start_pos: that.start_pos,
-                    limit: that.amount_per_page,
-                    filter: that.filter,
-                    sort: that.sort
-                },
-                    function (data) {
-                        that.data = data;
-                        that.render(data);
-                        that.start_pos = that.start_pos + data.data.length;
-                        that.table_container.scrollTop(1);
+                        that.start_pos = Math.floor(position / 10);
+
+                        if(position > that.amount_per_page / 2)
+                            that.table.css('top',(top - Math.floor(that.amount_per_page / 2) * 38) + 'px');
+                        else
+                            that.table.css('top',0 + 'px');
                     }
                 )
             }
@@ -185,9 +184,9 @@ function DataTable(data) {
                 top: e.pageY,
                 left: e.pageX
             }
-            var container_width = that.table_container.width();
+            var container_width = that.table.width();
             container_width = container_width + offset;
-            that.table_container.width(container_width);
+            that.table.width(container_width);
             var th = $('th.ld-datatable-resizing-helper', that.table);
             var width = th.width();
             width = width + offset;
@@ -336,4 +335,5 @@ DataTable.prototype.render = function () {
             tr.append(td);
         }
     }
+    
 }

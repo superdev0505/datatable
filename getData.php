@@ -1,77 +1,43 @@
 <?php
 	$amount = $_POST['limit'];
 	$start_pos = $_POST['start_pos'];
+	// $filter = $_POST['filter'];
+	// $sort = $_POST['sort'];
+	$data = array ();
+	$link = mysqli_connect('localhost', 'root', '', 'crm');
+	if (!$link) {
+		die('Could not connect: ' . mysqli_error());
+	}
+	$sql = "select customer_id, customer_name, customer_company, customer_email, customer_address, customer_phone as count from crm_customers";
+	$total = mysqli_query($link, $sql);
 
-	//PHP array containing forenames.
-	$names = array(
-		'Christopher',
-		'Ryan',
-		'Ethan',
-		'John',
-		'Zoey',
-		'Sarah',
-		'Michelle',
-		'Samantha',
-	);
+	$total_amount = mysqli_num_rows($total);
 	
-	//PHP array containing surnames.
-	$surnames = array(
-		'Walker',
-		'Thompson',
-		'Anderson',
-		'Johnson',
-		'Tremblay',
-		'Peltier',
-		'Cunningham',
-		'Simpson',
-		'Mercado',
-		'Sellers'
-	);
+	$sql = "SELECT customer_id, customer_name, customer_company, customer_email, customer_address, customer_phone FROM crm_customers LIMIT ${amount} OFFSET ${start_pos}";
+	$result = mysqli_query($link, $sql);
+	$amount_result = mysqli_num_rows($result);
+	if ($amount_result > 0) {
+		while($row = mysqli_fetch_assoc($result)) {
+		   array_push($data, $row);
+		}
+	}
 
-	$countries = array(
-		'United State',
-		'United Kingdom',
-		'Australia',
-		'New Zealand',
-		'Austria',
-		'Germany',
-		'Brazil',
-		'China',
-		'Russia',
-		'Mexico'
-	);
+	mysqli_close($link);
 
 	$info = array (
-		"total_amount"=> 10000,
-        "start_point"=> 0,
-        "amount_per_page"=> 30
+		"total_amount"=> $total_amount,
+        "start_point"=> $start_pos,
+        "amount_per_page"=> $amount_result
 	);
 
 	$fields = array (
-		"id"=> "ID",
-        "first_name"=> "First Name",
-        "last_name"=> "Last Name",
-        "zipcode"=> "Zipcode",
-        "country"=> "Country"
+		"customer_id"=> "ID",
+        "customer_name"=> "Name",
+        "customer_company"=> "Company",
+        "customer_email"=> "Email",
+		"customer_address"=> "Address",
+		"customer_phone"=> "Phone"
 	);
-
-	$data = array ();
-	for ($i = 0; $i < $amount; $i ++) {
-		$id = rand(1, 1000);
-		$first_name = $names[rand(0, 7)];
-		$last_name = $surnames[rand(0, 9)];
-		$country = $countries[rand(0, 9)];
-		$zipcode = rand(10000, 99999);
-		$item = array (
-			"id"=> $id,
-			"first_name"=> $first_name,
-			"last_name"=> $last_name,
-			"zipcode"=> $zipcode,
-			"country"=> $country
-		);
-		
-		array_push($data, $item);
-	}
 
 	$response = array (
 		'info'=> $info,
