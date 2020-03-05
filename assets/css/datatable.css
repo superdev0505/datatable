@@ -51,16 +51,16 @@
     z-index: 12;
 }
 
-.ld-datatable-move-handle {
+span.ld-datatable-move-handle {
     float: left;
     position: absolute;
 }
 
-.ld-datatable-move-handle:hover {
+span.ld-datatable-move-handle:hover {
     cursor: pointer;
 }
 
-.ld-datatable-resize-handle {
+span.ld-datatable-resize-handle {
     float: right;
     position: absolute;
     width: 5px;
@@ -69,14 +69,15 @@
     opacity: 0;
     right: 0;
     top: 0;
+    z-index: 20;
 }
 
-.ld-datatable-resize-handle:hover {
+span.ld-datatable-resize-handle:hover {
     opacity: 1;
     cursor: col-resize;
 }
 
-.ld-datatable-move-ghost-placeholder {
+div.ld-datatable-move-ghost-placeholder {
     height: 150px;
     border: 1px solid rgba(88, 88, 88, 0.3);
     border-radius: 10px;

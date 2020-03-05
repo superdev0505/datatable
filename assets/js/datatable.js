@@ -58,6 +58,7 @@ function DataTable(data) {
 
     this.ghost = $('<div class="ld-datatable-move-ghost-placeholder"><span class="title"></span></div>');
     this.ghost.css('position', 'absolute');
+    this.ghost.css('z-index', '40');
     var that = this;
 
     $.post(
@@ -95,6 +96,22 @@ function DataTable(data) {
     });
     that.table.on('mouseleave', 'th.ld-datatable-fixed', function () {
         that.resize.remove();
+    });
+
+    that.table.on('mouseover', '.ld-datatable-resize-handle', function () {
+        that.resize.css('opacity', 1);
+        that.resize.css('cursor', 'col-resize');
+    });
+    that.table.on('mouseleave', '.ld-datatable-resize-handle', function () {
+        that.resize.css('opacity', 0);
+        that.resize.css('cursor', 'auto');
+    });
+
+    that.table.on('mouseover', '.ld-datatable-move-handle', function () {
+        that.resize.css('cursor', 'pointer');
+    });
+    that.table.on('mouseleave', '.ld-datatable-move-handle', function () {
+        that.resize.css('cursor', 'auto');
     });
 
     that.table_container.on('scroll', function (e) {
@@ -174,7 +191,7 @@ function DataTable(data) {
             var ths = $('th', that.table).not('.ld-datatable-fixed');
             for (var i = 0; i < ths.length; i++) {
                 if (that.cur_pos.left > ths.eq(i).offset().left) {
-                    if (i < ths.length - 1 && that.cur_pos.left < ths.eq(i + 1).position().left) {
+                    if (i < ths.length - 1 && that.cur_pos.left < ths.eq(i + 1).offset().left) {
                         ths.removeClass('ld-datatable-move-hover');
                         ths.eq(i).addClass('ld-datatable-move-hover');
                     } else if (i == ths.length - 1) {
