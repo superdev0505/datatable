@@ -1,6 +1,7 @@
 <?php
 	$amount = $_POST['limit'];
 	$start_pos = $_POST['start_pos'];
+	$draw = $_POST['draw'];
 	// $filter = $_POST['filter'];
 	// $sort = $_POST['sort'];
 	$data = array ();
@@ -40,6 +41,7 @@
 	);
 
 	$response = array (
+		'draw'=>$draw,
 		'info'=> $info,
 		'fields'=> $fields,
 		'data'=> $data

@@ -14,6 +14,7 @@ function DataTable(data) {
     this.table_container.appendTo(this.table.parent());
     this.table_container.append(this.table);
     this.start_pos = 0;
+    this.draw = 0;
     if (data.hide) {
         this.hide = data.hide;
     } else {
@@ -64,7 +65,8 @@ function DataTable(data) {
         that.ajax, {
         start_pos: that.start_pos,
         limit: that.amount_per_page,
-        filter: that.filter
+        filter: that.filter,
+        draw: that.draw
     },
         function (data) {
             that.data = data;
@@ -126,24 +128,27 @@ function DataTable(data) {
 
             var position = Math.floor((top / 38));
             if( that.start_pos !=  Math.floor(position / 10)) {
+                if (position > that.data.info.total_amount - Math.floor(that.amount_per_page / 2)) 
+                    that.table.css('top', ((that.data.info.total_amount - that.amount_per_page) * that.row_height) + 'px');
+                else if(position > Math.floor(that.amount_per_page / 2))
+                    that.table.css('top', (top - Math.floor(that.amount_per_page / 2) * that.row_height) + 'px');
+                else
+                    that.table.css('top', 0 + 'px');
+                that.draw += 1;
                 $.post(
                     that.ajax, {
-                    start_pos: (position - Math.floor(that.amount_per_page / 2)) > 0 ? (position - Math.floor(that.amount_per_page / 2)) : 0,
+                    start_pos: (position - Math.floor(that.amount_per_page / 2)) > 0 ? (position > that.data.info.total_amount - Math.floor(that.amount_per_page / 2)) ? (that.data.info.total_amount - that.amount_per_page) : (position - Math.floor(that.amount_per_page / 2)) : 0,
                     limit: that.amount_per_page,
+                    draw: that.draw,
                     filter: that.filter,
                     sort: that.sort
                 },
                     function (data) {
-                        that.data = data;
-                        that.render(data);
-                        that.start_pos = Math.floor(position / 10);
-
-                        if(position > Math.floor(that.amount_per_page / 2))
-                            that.table.css('top', (top - Math.floor(that.amount_per_page / 2) * that.row_height) + 'px');
-                        // else if (position > that.data.info.total_amount - Math.floor(that.amount_per_page / 2)) 
-                        //     that.table.css('top', ((that.data.info.total_amount - that.amount_per_page) * that.row_height) + 'px');
-                        else
-                            that.table.css('top', 0 + 'px');
+                        if (data.draw == that.draw) {
+                            that.data = data;
+                            that.render(data);
+                            that.start_pos = Math.floor(position / 10);
+                        }
                     }
                 )
             }
