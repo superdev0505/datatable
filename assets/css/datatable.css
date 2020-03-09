@@ -1,3 +1,7 @@
+html {
+    scroll-behavior: smooth;
+}
+
 .ld-datatable-container {
     height: 200px;
     overflow-y: auto;
@@ -12,22 +16,20 @@
     top: 0px;
 }
 
-.ld-datatable tr {
+.ld-datatable tr,
+.ld-datatable-header tr {
     height: 40px;
 }
 
-.ld-datatable thead tr th {
+.ld-datatable-header thead tr th {
     border-top-left-radius: 10px;
     border-top-right-radius: 10px;
     box-shadow: 0px -2px 2px darkgrey;
     border-bottom: 1px solid darkgrey;
     min-width: 80px;
     text-overflow: ellipsis;
-    position: -webkit-sticky;
-    /* for Safari */
-    position: sticky;
-    top: 2px;
     z-index: 11;
+    position: relative;
 }
 
 .ld-datatable th,
@@ -47,7 +49,10 @@
     z-index: 10;
 }
 
-.ld-datatable thead th.ld-datatable-fixed {
+.ld-datatable-header thead th.ld-datatable-fixed {
+    position: -webkit-sticky;
+    /* for Safari */
+    position: sticky;
     left: 0;
     z-index: 12;
 }
@@ -86,7 +91,37 @@ div.ld-datatable-move-ghost-placeholder {
     text-align: center;
 }
 
-.ld-datatable th.ld-datatable-move-hover {
+.ld-datatable-header th.ld-datatable-move-hover {
     background-color: darkgrey;
     color: white;
+}
+
+.ld-datatable-loading-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 30;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(0,0,0, 0.5);
+}
+
+.ld-datatable-loading {
+    display: inline-block;
+    width: 50px;
+    height: 50px;
+    border: 3px solid rgba(255,255,255,.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spin 1s ease-in-out infinite;
+    -webkit-animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+to { -webkit-transform: rotate(360deg); }
+}
+@-webkit-keyframes spin {
+to { -webkit-transform: rotate(360deg); }
 }

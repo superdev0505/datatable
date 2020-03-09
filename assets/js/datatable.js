@@ -1,6 +1,11 @@
 function DataTable(data) {
     this.table_container = $('<div class="ld-datatable-container"></div>');
     this.table = $(data.table);
+    this.table_header = $('thead', this.table);
+    this.table_header = $('<table class="ld-datatable-header"></table').append(this.table_header);
+    this.table_header_container = $('<div class="ld-datatable-header-container"></div>');
+    this.table_header_container.append(this.table_header);
+    
     this.table.addClass('ld-datatable');
     // this.table.parent().css('overflow-x', 'auto');
     if (data.ajax) {
@@ -13,8 +18,30 @@ function DataTable(data) {
     this.table_container.css('overflow-x', 'auto');
     this.table_container.appendTo(this.table.parent());
     this.table_container.append(this.table);
+    this.table_header_container.css('max-width', min_width);
+    this.table_header_container.css('overflow-x', 'hidden');
+    this.table_header_container.insertBefore(this.table_container);
     this.start_pos = 0;
     this.draw = 0;
+    this.loading_container = $('<div class="ld-datatable-loading-container"></div>');
+    this.loading = $('<div class="ld-datatable-loading"></div>');
+    this.loading_container.append(this.loading);
+    var height = this.table_container.height();
+    this.loading_container.height(height);
+    this.table_container.append(this.loading_container);
+    var loadingTimeout;
+    this.loading_container.hide()
+    .ajaxStart(function() {
+        var element = $(this);
+        loadingTimeout = setTimeout(function() {
+           element.show();
+        }, 500);
+    })
+    .ajaxStop(function() {
+        clearTimeout(loadingTimeout);
+        $(this).hide();
+    });;
+    this.table_container.append(this.loading_container);
     if (data.hide) {
         this.hide = data.hide;
     } else {
@@ -75,66 +102,81 @@ function DataTable(data) {
             var height = that.data.info.total_amount * that.row_height;
             div.height(height);
             that.table_container.append(div);
-            var ths = $('th', that.table);
-            for (var i = 0; i < ths.length; i ++) {
-                var width = ths.eq(i).width();
-                ths.eq(i).width(width);
+            var tr = $('tr', that.table).eq(0);
+            var thead_ths = $('th', that.table_header);
+            var tds = $('td', tr);
+            for(var i = 0; i < tds.length; i ++) {
+                var width = tds.eq(i).width();
+                if (width < 80) {
+                    width = 80;    
+                }
+                thead_ths.eq(i).width(width);
             }
             that.table.css('table-layout', 'fixed');
+            that.table_container.css('table-layout', 'fixed');
+            // if ( that.table_container.get(0).scrollHeight > that.table_container.height() ) {
+            //     that.table_header.css('padding-right', '18px');
+            // }
         }
     )
 
-    that.table.on('mouseover', 'th:not(.ld-datatable-fixed)', function () {
+    that.table_header.on('mouseover', 'th:not(.ld-datatable-fixed)', function () {
         $(this).prepend(that.move);
         $(this).append(that.resize);
     });
-    that.table.on('mouseleave', 'th:not(.ld-datatable-fixed)', function () {
+    that.table_header.on('mouseleave', 'th:not(.ld-datatable-fixed)', function () {
         that.move.remove();
         that.resize.remove();
     });
 
-    that.table.on('mouseover', 'th.ld-datatable-fixed', function () {
+    that.table_header.on('mouseover', 'th.ld-datatable-fixed', function () {
         $(this).append(that.resize);
     });
-    that.table.on('mouseleave', 'th.ld-datatable-fixed', function () {
+    that.table_header.on('mouseleave', 'th.ld-datatable-fixed', function () {
         that.resize.remove();
     });
 
-    that.table.on('mouseover', '.ld-datatable-resize-handle', function () {
+    that.table_header.on('mouseover', '.ld-datatable-resize-handle', function () {
         that.resize.css('opacity', 1);
         that.resize.css('cursor', 'col-resize');
     });
-    that.table.on('mouseleave', '.ld-datatable-resize-handle', function () {
+    that.table_header.on('mouseleave', '.ld-datatable-resize-handle', function () {
         that.resize.css('opacity', 0);
         that.resize.css('cursor', 'auto');
     });
 
-    that.table.on('mouseover', '.ld-datatable-move-handle', function () {
+    that.table_header.on('mouseover', '.ld-datatable-move-handle', function () {
         that.move.css('cursor', 'pointer');
     });
-    that.table.on('mouseleave', '.ld-datatable-move-handle', function () {
+    that.table_header.on('mouseleave', '.ld-datatable-move-handle', function () {
         that.move.css('cursor', 'auto');
     });
 
     that.table_container.on('scroll', function (e) {
+        that.loading_container.css('top', $(this).scrollTop());
         var left = $(this).scrollLeft();
+        that.table_header_container.scrollLeft(left);
         if (left > 0) {
             $('.ld-datatable-fixed', that.table).css('opacity', '0.7');
+            $('.ld-datatable-fixed', that.table_header).css('opacity', '0.7');
         } else {
             $('.ld-datatable-fixed', that.table).css('opacity', '1');
+            $('.ld-datatable-fixed', that.table_header).css('opacity', '1');
         }
         if (that.ajax) {
             var top = $(this).scrollTop();
 
             var position = Math.floor((top / 38));
             if( that.start_pos !=  Math.floor(position / 10)) {
-                if (position > that.data.info.total_amount - Math.floor(that.amount_per_page / 2)) 
+                if (position > that.data.info.total_amount - Math.floor(that.amount_per_page / 2 - 10)) 
                     that.table.css('top', ((that.data.info.total_amount - that.amount_per_page) * that.row_height) + 'px');
-                else if(position > Math.floor(that.amount_per_page / 2))
-                    that.table.css('top', (top - Math.floor(that.amount_per_page / 2) * that.row_height) + 'px');
+                else if(position > Math.floor(that.amount_per_page / 2)) {
+                    that.table.css('top', (top - (Math.floor(that.amount_per_page / 2) * that.row_height)) + 'px');
+                }
                 else
                     that.table.css('top', 0 + 'px');
                 that.draw += 1;
+                that.table_container.append(that.loading_container);
                 $.post(
                     that.ajax, {
                     start_pos: (position - Math.floor(that.amount_per_page / 2)) > 0 ? (position > that.data.info.total_amount - Math.floor(that.amount_per_page / 2)) ? (that.data.info.total_amount - that.amount_per_page) : (position - Math.floor(that.amount_per_page / 2)) : 0,
@@ -164,7 +206,7 @@ function DataTable(data) {
             that.ghost.outerWidth(width);
             $('.title', that.ghost).text(title);
             var th_pos = th.offset();
-            that.table_container.append(that.ghost);
+            that.table_container.parent().append(that.ghost);
             that.ghost.offset(th_pos);
             that.cur_pos = {
                 top: e.pageY,
@@ -186,6 +228,7 @@ function DataTable(data) {
     $(document).on('mousemove', function (e) {
         if (that.moving_flag === true || that.resizing_flag === true) {
             that.table.css('user-select', 'none');
+            that.table_header.css('user-select', 'none');
         } 
         if (that.moving_flag === true) {
             var ghost_pos = that.ghost.offset();
@@ -198,7 +241,7 @@ function DataTable(data) {
                 top: e.pageY,
                 left: e.pageX
             }
-            var ths = $('th', that.table).not('.ld-datatable-fixed');
+            var ths = $('th', that.table_header).not('.ld-datatable-fixed');
             for (var i = 0; i < ths.length; i++) {
                 if (that.cur_pos.left > ths.eq(i).offset().left) {
                     if (i < ths.length - 1 && that.cur_pos.left < ths.eq(i + 1).offset().left) {
@@ -217,34 +260,52 @@ function DataTable(data) {
                 top: e.pageY,
                 left: e.pageX
             }
-            if (offset < 0) {
-                var th = $('th.ld-datatable-resizing-helper', that.table);
-                var width = th.width();
-                width = width + offset;
-                th.width(width);
-            }
-            var container_width = that.table.width();
-            container_width = container_width + offset;
-            that.table.width(container_width);
-            that.table_container.width(container_width + 18);
-            if (offset > 0) {
-                var th = $('th.ld-datatable-resizing-helper', that.table);
-                var width = th.width();
-                width = width + offset;
-                th.width(width);
+            if (offset != 0) {
+                if (offset < 0) {
+                    var th = $('th.ld-datatable-resizing-helper', that.table_header);
+                    var helper_index = $('th:not([style*="display: none"])', that.table_header).index(th[0]);
+                    var tr = $('tr', that.table).eq(0);
+                    var td = $('td', tr).eq(helper_index);
+                    var width = th.outerWidth();
+                    width = width + offset;
+                    th.outerWidth(width);
+                    td.outerWidth(width);
+                }
+                var container_width = that.table.outerWidth();
+                container_width = container_width + offset;
+                that.table_container.outerWidth(container_width + 18);
+                that.table.outerWidth(container_width);
+                if (container_width + 18 > parseInt(that.table_container.css('max-width'))) {
+                    that.table_header.outerWidth(container_width + 18);
+                    that.table_header.css('padding-right', '18px');
+                } else {
+                    that.table_header.css('padding-right', '0');
+                    that.table_header.outerWidth(container_width);
+                }
+                if (offset > 0) {
+                    var th = $('th.ld-datatable-resizing-helper', that.table_header);
+                    var helper_index = $('th:not([style*="display: none"])', that.table_header).index(th[0]);
+                    var tr = $('tr', that.table).eq(0);
+                    var td = $('td', tr).eq(helper_index);
+                    var width = th.outerWidth();
+                    width = width + offset;
+                    th.outerWidth(width);
+                    td.outerWidth(width);
+                }
             }
         }
     });
     $(document).on('mouseup', function (e) {
         that.table.css('user-select', 'initial');
+        that.table_header.css('user-select', 'initial');
         if (that.moving_flag) {
             that.moving_flag = false;
             that.ghost.remove();
             var before = false;
-            var helper = $('th.ld-datatable-move-helper', that.table);
-            var helper_index = $('th', that.table).index(helper[0]);
-            var move = $('th.ld-datatable-move-hover', that.table);
-            var move_index = $('th', that.table).index(move[0]);
+            var helper = $('th.ld-datatable-move-helper', that.table_header);
+            var helper_index = $('th:not([style*="display: none"])', that.table_header).index(helper[0]);
+            var move = $('th.ld-datatable-move-hover', that.table_header);
+            var move_index = $('th:not([style*="display: none"])', that.table_header).index(move[0]);
             if (helper_index != move_index) {
                 if (helper_index > move_index) {
                     before = true
@@ -268,11 +329,13 @@ function DataTable(data) {
             }
             helper.removeClass('ld-datatable-move-helper');
             move.removeClass('ld-datatable-move-hover');
+            that.table.trigger('reorderCompleted');
         }
         if (that.resizing_flag) {
             that.resizing_flag = false;
-            var th = $('th.ld-datatable-resizing-helper', that.table);
+            var th = $('th.ld-datatable-resizing-helper', that.table_header);
             th.removeClass('ld-datatable-resizing-helper');
+            that.table.trigger('resizeCompleted');
         }
     });
 }
@@ -316,10 +379,11 @@ DataTable.prototype.hideColumn = function (hide) {
 }
 
 DataTable.prototype.render = function () {
-    var headers = $('thead th', this.table);
+    var headers = $('thead th', this.table_header);
     var order = [];
     var that = this;
     var j = 0;
+    var bool_first_time = false;
     if (headers.length) {
         headers.show();
         for (var i = 0; i < headers.length; i ++) {
@@ -332,11 +396,12 @@ DataTable.prototype.render = function () {
             }
         }
     } else {
+        bool_first_time = true;
         var head = $('<thead></thead>');
         var tr = $('<tr></tr>');
-        var select_column = $('<select multiple class="ld-datatable-column-select"></select>')
+        var select_column = $('<select multiple class="ld-datatable-column-select"></select>');
         head.append(tr);
-        that.table.append(head);
+        that.table_header.append(head);
         i = 0;
         Object.entries(that.data.fields).forEach((field) => {
             var th = $('<th field_name=' + field[0] + '>' + field[1] + '</th>');
@@ -378,7 +443,30 @@ DataTable.prototype.render = function () {
             tr.append(td);
         }
     }
+
+    if (bool_first_time) {
+        var tr = $('tr', body).eq(0);
+        var thead_ths = $('th', this.table_header);
+        var tds = $('td', tr);
+        for(var i = 0; i < tds.length; i ++) {
+            var width = tds.eq(i).width();
+            if (width < 80) {
+                width = 80;    
+            }
+            tds.eq(i).width(width);
+            thead_ths.eq(i).width(width);
+        }
+    } else {
+        var tr = $('tr', body).eq(0);
+        var thead_ths = $('th', this.table_header);
+        var tds = $('td', tr);
+        for(var i = 0; i < thead_ths.length; i ++) {
+            var width = thead_ths.eq(i).width();
+            tds.eq(i).width(width);
+        }
+    }
     if (this.row_height != 40) {
         $('tr', this.table).height(this.row_height);
+        $('tr', this.table_header).height(this.row_height);
     }
 }

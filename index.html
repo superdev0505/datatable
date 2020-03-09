@@ -34,6 +34,12 @@
         ajax: 'getData.php',
         pagination: 40
       });
+      $("#example").on('resizeCompleted', function(e) {
+        alert("complete");
+      });
+      $("#example").on('reorderCompleted', function(e) {
+        alert("reorder complete");
+      });
     });
   </script>
 </body>
