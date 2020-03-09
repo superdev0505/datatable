@@ -138,18 +138,23 @@ function DataTable(data) {
 
     that.table_header.on('mouseover', '.ld-datatable-resize-handle', function () {
         that.resize.css('opacity', 1);
-        that.resize.css('cursor', 'col-resize');
+        $('body').css('cursor', 'col-resize');
     });
     that.table_header.on('mouseleave', '.ld-datatable-resize-handle', function () {
-        that.resize.css('opacity', 0);
-        that.resize.css('cursor', 'auto');
+        if (!that.resizing_flag) {
+            that.resize.css('opacity', 0);
+            $('body').css('cursor', 'auto');
+        }
     });
 
     that.table_header.on('mouseover', '.ld-datatable-move-handle', function () {
-        that.move.css('cursor', 'pointer');
+        $('body').css('cursor', 'pointer');
     });
+
     that.table_header.on('mouseleave', '.ld-datatable-move-handle', function () {
-        that.move.css('cursor', 'auto');
+        if (!that.moving_flag) {
+            $('body').css('cursor', 'auto');
+        }
     });
 
     that.table_container.on('scroll', function (e) {
@@ -298,6 +303,8 @@ function DataTable(data) {
     $(document).on('mouseup', function (e) {
         that.table.css('user-select', 'initial');
         that.table_header.css('user-select', 'initial');
+        that.resize.css('opacity', 0);
+        $('body').css('cursor', 'auto');
         if (that.moving_flag) {
             that.moving_flag = false;
             that.ghost.remove();
