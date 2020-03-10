@@ -10,14 +10,21 @@ html {
     width: 1200px;
 }
 
+.ld-datatable-header {
+    padding-right: 18px;
+    border-spacing: 0;
+    border-collapse: initial;
+}
+
 .ld-datatable {
     width: 100%;
     position: absolute;
     top: 0px;
+    border-spacing: 0;
+    border-collapse: initial;
 }
 
-.ld-datatable tr,
-.ld-datatable-header tr {
+.ld-datatable tr {
     height: 40px;
 }
 
@@ -30,11 +37,12 @@ html {
     text-overflow: ellipsis;
     z-index: 11;
     position: relative;
+    float: left;
 }
 
-.ld-datatable th,
 .ld-datatable td {
     background-color: white;
+    text-overflow: ellipsis;
 }
 
 .ld-datatable tbody {

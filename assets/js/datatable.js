@@ -13,7 +13,7 @@ function DataTable(data) {
     } else {
         this.ajax = ''
     }
-    var min_width = this.table.parent().width();
+    var min_width = this.table.parent().outerWidth();
     this.table_container.css('max-width', min_width);
     this.table_container.css('overflow-x', 'auto');
     this.table_container.appendTo(this.table.parent());
@@ -106,14 +106,14 @@ function DataTable(data) {
             var thead_ths = $('th', that.table_header);
             var tds = $('td', tr);
             for(var i = 0; i < tds.length; i ++) {
-                var width = tds.eq(i).width();
+                var width = tds.eq(i).outerWidth();
                 if (width < 80) {
                     width = 80;    
                 }
-                thead_ths.eq(i).width(width);
+                thead_ths.eq(i).outerWidth(width);
             }
             that.table.css('table-layout', 'fixed');
-            that.table_container.css('table-layout', 'fixed');
+            that.table_header.css('table-layout', 'fixed');
             // if ( that.table_container.get(0).scrollHeight > that.table_container.height() ) {
             //     that.table_header.css('padding-right', '18px');
             // }
@@ -246,7 +246,7 @@ function DataTable(data) {
                 top: e.pageY,
                 left: e.pageX
             }
-            var ths = $('th', that.table_header).not('.ld-datatable-fixed');
+            var ths = $('th:not([style*="display: none"])', that.table_header).not('.ld-datatable-fixed');
             for (var i = 0; i < ths.length; i++) {
                 if (that.cur_pos.left > ths.eq(i).offset().left) {
                     if (i < ths.length - 1 && that.cur_pos.left < ths.eq(i + 1).offset().left) {
@@ -268,34 +268,35 @@ function DataTable(data) {
             if (offset != 0) {
                 if (offset < 0) {
                     var th = $('th.ld-datatable-resizing-helper', that.table_header);
-                    var helper_index = $('th:not([style*="display: none"])', that.table_header).index(th[0]);
-                    var tr = $('tr', that.table).eq(0);
-                    var td = $('td', tr).eq(helper_index);
                     var width = th.outerWidth();
                     width = width + offset;
                     th.outerWidth(width);
-                    td.outerWidth(width);
                 }
-                var container_width = that.table.outerWidth();
+                var container_width = that.table_header.outerWidth();
                 container_width = container_width + offset;
-                that.table_container.outerWidth(container_width + 18);
-                that.table.outerWidth(container_width);
-                if (container_width + 18 > parseInt(that.table_container.css('max-width'))) {
-                    that.table_header.outerWidth(container_width + 18);
-                    that.table_header.css('padding-right', '18px');
-                } else {
-                    that.table_header.css('padding-right', '0');
+                if (navigator.userAgent.indexOf("Firefox") != -1 ) {
                     that.table_header.outerWidth(container_width);
+                } else {
+                    that.table_header.outerWidth(container_width + 18);
                 }
                 if (offset > 0) {
                     var th = $('th.ld-datatable-resizing-helper', that.table_header);
-                    var helper_index = $('th:not([style*="display: none"])', that.table_header).index(th[0]);
-                    var tr = $('tr', that.table).eq(0);
-                    var td = $('td', tr).eq(helper_index);
                     var width = th.outerWidth();
                     width = width + offset;
                     th.outerWidth(width);
-                    td.outerWidth(width);
+                }
+                if (offset < 0) {
+                    that.table_container.outerWidth(container_width);    
+                }
+                var tr = $('tr', that.table).eq(0);
+                var thead_ths = $('th:not([style*="display: none"])', that.table_header);
+                var tds = $('td', tr);
+                for(var i = 0; i < thead_ths.length; i ++) {
+                    var width = thead_ths.eq(i).outerWidth();
+                    tds.eq(i).outerWidth(width);
+                }
+                if (offset > 0) {
+                    that.table_container.outerWidth(container_width);
                 }
             }
         }
@@ -391,16 +392,32 @@ DataTable.prototype.render = function () {
     var that = this;
     var j = 0;
     var bool_first_time = false;
+    var left = this.table_container.scrollLeft();
+    var top = this.table_container.scrollTop();
     if (headers.length) {
+        var size = [];
+        for (var i = 0; i < headers.length; i ++){
+            size[i] = headers.eq(i).outerWidth();
+        }
         headers.show();
+        var totalsize = 0;
         for (var i = 0; i < headers.length; i ++) {
             field_name = headers.eq(i).attr('field_name');
             if (that.hide.indexOf(field_name) == -1) {
                 order[j] = headers.eq(i).attr('field_name');
+                totalsize += size[i];
                 j ++;
             } else {
                 headers.eq(i).hide();
             }
+        }
+        for (var i = 0; i < headers.length; i ++){
+            headers.eq(i).outerWidth(size[i]);
+        }
+        if (navigator.userAgent.indexOf("Firefox") != -1 ) {
+            this.table_header.width(totalsize);
+        } else {
+            this.table_header.width(totalsize + 18);
         }
     } else {
         bool_first_time = true;
@@ -432,6 +449,7 @@ DataTable.prototype.render = function () {
             that.hideColumn(select_column.val());
         })
     }
+    
     var body = $('tbody', that.table);
     if (!body.length) {
         body = $('<tbody></tbody>');
@@ -455,25 +473,32 @@ DataTable.prototype.render = function () {
         var tr = $('tr', body).eq(0);
         var thead_ths = $('th', this.table_header);
         var tds = $('td', tr);
+        var total_width = 0
         for(var i = 0; i < tds.length; i ++) {
-            var width = tds.eq(i).width();
+            var width = tds.eq(i).outerWidth();
             if (width < 80) {
-                width = 80;    
+                width = 82;    
             }
-            tds.eq(i).width(width);
-            thead_ths.eq(i).width(width);
+            tds.eq(i).outerWidth(width);
+            thead_ths.eq(i).outerWidth(width);
+            total_width += width;
         }
+        this.table_header.width(total_width + 18);
     } else {
+        var total_width = this.table_header.outerWidth();
         var tr = $('tr', body).eq(0);
-        var thead_ths = $('th', this.table_header);
+        var thead_ths = $('th:not([style*="display: none"])', this.table_header);
         var tds = $('td', tr);
         for(var i = 0; i < thead_ths.length; i ++) {
-            var width = thead_ths.eq(i).width();
-            tds.eq(i).width(width);
+            var width = thead_ths.eq(i).outerWidth();
+            tds.eq(i).outerWidth(width);
         }
+        that.table_container.outerWidth(total_width);
     }
+    this.table_container.scrollLeft(left);
+    this.table_container.scrollTop(top);
+    this.table_header_container.scrollLeft(left);
     if (this.row_height != 40) {
         $('tr', this.table).height(this.row_height);
-        $('tr', this.table_header).height(this.row_height);
     }
 }
